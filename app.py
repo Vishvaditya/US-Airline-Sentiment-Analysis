@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
+import plotly.express as px
 
 st.title("US Airline Sentiment Analysis")
 st.sidebar.title("Sentiment Analysis of Tweets using Streamlit")
@@ -27,6 +28,18 @@ st.sidebar.markdown(
     .iat[0, 0]
 )
 
+st.sidebar.markdown("---Numner of Tweets by Sentiment---")
+select = st.sidebar.selectbox("Graph Type", ["Histogram", "Pie Chart"], key="1")
 
-# st.write(tweets)
+sentiment_count = tweets["airline_sentiment"].value_counts()
+sentiment_count = pd.DataFrame(
+    {"Sentiment": sentiment_count.index, "Tweets": sentiment_count.values}
+)
 
+if not st.sidebar.checkbox("Hide", True):
+    st.markdown("---Number of Tweets by Sentiment---")
+    if select == "Histogram":
+        fig = px.bar(
+            sentiment_count, x="Sentiment", y="Tweets", color="Tweets", height=500
+        )
+        st.plotly_chart(fig)
