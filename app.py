@@ -2,6 +2,11 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly.express as px
+from wordcloud import WordCloud, STOPWORDS
+import matplotlib.pyplot as plt
+import wordcloud
+
+st.set_option("deprecation.showPyplotGlobalUse", False)
 
 st.title("US Airline Sentiment Analysis")
 st.sidebar.title("Sentiment Analysis of Tweets using Streamlit")
@@ -55,7 +60,7 @@ if not st.sidebar.checkbox("Hide", False):
 st.sidebar.subheader("Location and Time of Tweets")
 hour = st.sidebar.slider("Hour of Day", 0, 23)
 time_data = tweets[tweets["tweet_created"].dt.hour == hour]
-if not st.sidebar.checkbox("Hide", False, key=1):
+if not st.sidebar.checkbox("Hide", False, key="2"):
     st.markdown("---Tweet location based on time of day---")
     st.markdown(
         "%i tweets between %i:00 and %i:00" % (len(time_data), hour, (hour + 1) % 24)
@@ -85,5 +90,28 @@ if len(choice) > 0:
     )
     st.plotly_chart(fig_choice)
 
-# st.write(tweets)
+
+st.sidebar.subheader("Word Cloud")
+sentiment_word = st.sidebar.radio(
+    "Sentiment", ("Positive", "Negative", "Neutral"), key="2"
+)
+if not st.sidebar.checkbox("Hide", False, key="3"):
+    st.subheader("Word Cloud for %s sentiment" % (sentiment_word))
+    df = tweets[tweets["airline_sentiment"] == sentiment_word.lower()]
+    words = " ".join(df["text"])
+    processed_words = " ".join(
+        [
+            word
+            for word in words.split()
+            if "http" not in word and not word.startswith("@") and word != "RT"
+        ]
+    )
+    wordcloud = WordCloud(
+        stopwords=STOPWORDS, background_color="white", height=650, width=800
+    ).generate(processed_words)
+
+    plt.imshow(wordcloud)
+    plt.xticks([])
+    plt.yticks([])
+    st.pyplot()
 
