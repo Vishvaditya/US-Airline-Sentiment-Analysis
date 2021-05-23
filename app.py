@@ -6,7 +6,9 @@ from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 import wordcloud
 
-st.set_option("deprecation.showPyplotGlobalUse", False)
+st.set_option(
+    "deprecation.showPyplotGlobalUse", False
+)  # function to remove Warnings from dashboard
 
 st.title("US Airline Sentiment Analysis")
 st.sidebar.title("Sentiment Analysis of Tweets using Streamlit")
@@ -26,6 +28,7 @@ def load_data():
 tweets = load_data()
 
 
+# Code snippet to display random tweet based on user selected sentiment
 st.sidebar.subheader("Display Tweet")
 random_tweet = st.sidebar.radio("Sentiment", ("Positive", "Negative", "Neutral"))
 st.sidebar.markdown(
@@ -36,7 +39,7 @@ st.sidebar.markdown(
 
 
 st.sidebar.subheader("Number of Tweets by Sentiment")
-select = st.sidebar.selectbox("Graph Type", ["Histogram", "Pie Chart"], key="1")
+select = st.sidebar.selectbox("Graph Type", ["Bar Chart", "Pie Chart"], key="1")
 
 sentiment_count = tweets["airline_sentiment"].value_counts()
 sentiment_count = pd.DataFrame(
@@ -44,9 +47,10 @@ sentiment_count = pd.DataFrame(
 )
 
 
+# Creating a Bar chart or Pie chart based on user selection
 if not st.sidebar.checkbox("Hide", False):
-    st.markdown("---Number of Tweets by Sentiment---")
-    if select == "Histogram":
+    st.subheader("---Number of Tweets by Sentiment---")
+    if select == "Bar Chart":
         fig = px.bar(
             sentiment_count, x="Sentiment", y="Tweets", color="Tweets", height=500
         )
@@ -57,11 +61,12 @@ if not st.sidebar.checkbox("Hide", False):
         st.plotly_chart(fig)
 
 
+# Generating a map to display the  origin of tweets based on time of day selected by the user
 st.sidebar.subheader("Location and Time of Tweets")
 hour = st.sidebar.slider("Hour of Day", 0, 23)
 time_data = tweets[tweets["tweet_created"].dt.hour == hour]
 if not st.sidebar.checkbox("Hide", False, key="2"):
-    st.markdown("---Tweet location based on time of day---")
+    st.subheader("---Tweet location based on time of day---")
     st.markdown(
         "%i tweets between %i:00 and %i:00" % (len(time_data), hour, (hour + 1) % 24)
     )
@@ -69,6 +74,8 @@ if not st.sidebar.checkbox("Hide", False, key="2"):
     if st.sidebar.checkbox("Show data", False):
         st.write(time_data)
 
+
+# Plotting a histogram to compare number of tweets by sentiment for different airlines selected by User
 st.sidebar.subheader("Airline Tweets by sentiment")
 choice = st.sidebar.multiselect(
     "Select Airline(s)",
@@ -77,6 +84,7 @@ choice = st.sidebar.multiselect(
 
 if len(choice) > 0:
     choice_data = tweets[tweets.airline.isin(choice)]
+    st.subheader("---Histogram to Compare twets by airlines---")
     fig_choice = px.histogram(
         choice_data,
         x="airline",
@@ -91,12 +99,13 @@ if len(choice) > 0:
     st.plotly_chart(fig_choice)
 
 
+# Generating a word cloud based on sentiment selected by the user
 st.sidebar.subheader("Word Cloud")
 sentiment_word = st.sidebar.radio(
     "Sentiment", ("Positive", "Negative", "Neutral"), key="2"
 )
 if not st.sidebar.checkbox("Hide", False, key="3"):
-    st.subheader("Word Cloud for %s sentiment" % (sentiment_word))
+    st.subheader("---Word Cloud for %s sentiment---" % (sentiment_word))
     df = tweets[tweets["airline_sentiment"] == sentiment_word.lower()]
     words = " ".join(df["text"])
     processed_words = " ".join(
@@ -105,7 +114,7 @@ if not st.sidebar.checkbox("Hide", False, key="3"):
             for word in words.split()
             if "http" not in word and not word.startswith("@") and word != "RT"
         ]
-    )
+    )  # processed the word string to remove hyperlinks and retweets from the wordcloud
     wordcloud = WordCloud(
         stopwords=STOPWORDS, background_color="white", height=650, width=800
     ).generate(processed_words)
