@@ -20,6 +20,7 @@ def load_data():
 
 tweets = load_data()
 
+
 st.sidebar.subheader("Display Tweet")
 random_tweet = st.sidebar.radio("Sentiment", ("Positive", "Negative", "Neutral"))
 st.sidebar.markdown(
@@ -28,13 +29,15 @@ st.sidebar.markdown(
     .iat[0, 0]
 )
 
-st.sidebar.markdown("---Numner of Tweets by Sentiment---")
+
+st.sidebar.subheader("Number of Tweets by Sentiment")
 select = st.sidebar.selectbox("Graph Type", ["Histogram", "Pie Chart"], key="1")
 
 sentiment_count = tweets["airline_sentiment"].value_counts()
 sentiment_count = pd.DataFrame(
     {"Sentiment": sentiment_count.index, "Tweets": sentiment_count.values}
 )
+
 
 if not st.sidebar.checkbox("Hide", False):
     st.markdown("---Number of Tweets by Sentiment---")
@@ -47,3 +50,20 @@ if not st.sidebar.checkbox("Hide", False):
     else:
         fig = px.pie(sentiment_count, values="Tweets", names="Sentiment")
         st.plotly_chart(fig)
+
+
+st.sidebar.subheader("Location and Time of Tweets")
+hour = st.sidebar.slider("Hour of Day", 0, 23)
+time_data = tweets[tweets["tweet_created"].dt.hour == hour]
+if not st.sidebar.checkbox("Hide", False, key=1):
+    st.markdown("---Tweet location based on time of day---")
+    st.markdown(
+        "%i tweets between %i:00 and %i:00" % (len(time_data), hour, (hour + 1) % 24)
+    )
+    st.map(time_data)
+    if st.sidebar.checkbox("Show data", False):
+        st.write(time_data)
+
+
+# st.write(tweets)
+
